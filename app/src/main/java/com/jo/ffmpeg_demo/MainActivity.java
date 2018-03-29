@@ -30,6 +30,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ProgressBar progressBar;
     private TextView tvProcess;
     private FFmpegExecute fFmpegExecute;
+    private String audioPath;  //背景音频
+    private String onlyVideoPath;  //去除音频之后的视频
+    private String rolePath;   //加上背景和其他角色之后的视频
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,7 +44,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         tvProcess = findViewById(R.id.ffmpeg_process);
 
         fileUtils = new FileUtils(this);
-        modelPath = fileUtils.copyAssets(this);
+        modelPath = fileUtils.copyAssets(this, "peiyin_video.mp4");
         videoView.setVideoPath(modelPath);
 
         mMediaHelper = new MediaHelper(this);
@@ -49,6 +52,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mMediaHelper.setTargetName(System.currentTimeMillis() + ".mp4");
 
         fFmpegExecute = new FFmpegExecute(this);
+        findViewById(R.id.role_prepare).setOnClickListener(this);
         findViewById(R.id.start_record).setOnClickListener(this);
 
     }
@@ -63,6 +67,68 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.role_prepare:
+                audioPath = fileUtils.copyAssets(MainActivity.this, "peiyin_audio.mp3");
+                onlyVideoPath = fileUtils.getStorageDirectory() + "/only_video.mp4";
+                rolePath = fileUtils.getStorageDirectory() + "/role_video.mp4";
+                try {
+                    fFmpegExecute.execute(fFmpegExecute.extractVideo(modelPath, onlyVideoPath), new ExecuteBinaryResponseHandler() {
+                        @Override
+                        public void onFailure(String s) {
+                            Toast.makeText(MainActivity.this, "FAILED with role extract output : " + s, Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onSuccess(String s) {
+                            try {
+                                fFmpegExecute.execute(fFmpegExecute.composeVideo(onlyVideoPath, audioPath, rolePath), new ExecuteBinaryResponseHandler() {
+                                    @Override
+                                    public void onFailure(String s) {
+                                        Toast.makeText(MainActivity.this, "FAILED with role merge output : " + s, Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onSuccess(String s) {
+                                        tvProcess.setText("SUCCESS with role prepare");
+                                        modelPath = rolePath;
+                                    }
+                                    @Override
+                                    public void onProgress(String s) {
+                                        tvProcess.setText(s);
+                                    }
+
+                                    @Override
+                                    public void onStart() {
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+                                        progressBar.setVisibility(View.INVISIBLE);
+                                    }
+                                });
+                            } catch (FFmpegCommandAlreadyRunningException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onProgress(String s) {
+                            tvProcess.setText(s);
+                        }
+
+                        @Override
+                        public void onStart() {
+                            progressBar.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onFinish() {
+                        }
+                    });
+                } catch (FFmpegCommandAlreadyRunningException e) {
+                    e.printStackTrace();
+                }
+                break;
             case R.id.start_record:
                 tvProcess.setText("");
                 mMediaHelper.startPreView();

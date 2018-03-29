@@ -92,7 +92,7 @@ public class FileUtils {
         }
     }
 
-    public String copyAssets(Context context) {
+    public String copyAssets(Context context, String fileName) {
         AssetManager assetManager = context.getAssets();
         String[] files = null;
         try {
@@ -101,7 +101,7 @@ public class FileUtils {
             Log.e("tag", "Failed to get asset file list.", e);
         }
         if (files != null) for (String filename : files) {
-            if (!filename.contains("mp4")) {
+            if (!filename.contains(fileName)) {
                 continue;
             }
             InputStream in = null;
