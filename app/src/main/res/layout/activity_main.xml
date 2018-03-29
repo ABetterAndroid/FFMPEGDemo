@@ -32,6 +32,14 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/ffmpeg_process"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/video_make_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="32dp" />
+
     <Button
         android:id="@+id/start_record"
         android:layout_width="80dp"

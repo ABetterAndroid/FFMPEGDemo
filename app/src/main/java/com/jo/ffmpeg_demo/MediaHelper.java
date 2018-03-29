@@ -168,6 +168,10 @@ public class MediaHelper implements SurfaceHolder.Callback {
         }
     }
 
+    public void startPreView() {
+        startPreView(mSurfaceHolder);
+    }
+
     private void startPreView(SurfaceHolder holder) {
         if (mCamera == null) {
             mCamera = Camera.open(position);
