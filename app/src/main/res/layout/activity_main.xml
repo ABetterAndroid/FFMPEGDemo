@@ -40,14 +40,31 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="32dp" />
 
-    <Button
-        android:id="@+id/start_record"
-        android:layout_width="80dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginBottom="100dp"
-        android:text="开始录制" />
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/role_prepare"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="角色准备" />
+
+        <Button
+            android:id="@+id/start_record"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:text="开始录制" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progress_bar"
