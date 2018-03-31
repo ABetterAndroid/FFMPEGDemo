@@ -15,6 +15,12 @@ import com.github.hiteshsondhi88.libffmpeg.ExecuteBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import me.zhehua.uilibrary.LyricView;
+import me.zhehua.uilibrary.adapter.LyricAdapter;
+import me.zhehua.uilibrary.adapter.SimpleLyricAdapter;
 
 /**
  * Created by rongzhu on 2018/3/26.
@@ -24,6 +30,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private VideoView videoView;
     private SurfaceView surfaceView;
+    private LyricView lyricView;
     private MediaHelper mMediaHelper;
     private FileUtils fileUtils;
     private String modelPath;
@@ -42,6 +49,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
         surfaceView = findViewById(R.id.video_record);
         progressBar = findViewById(R.id.progress_bar);
         tvProcess = findViewById(R.id.ffmpeg_process);
+        lyricView = findViewById(R.id.lv_lyrics);
+
+        InputStream lrcStream = getResources().openRawResource(R.raw.peiyin_lyrics);
+        try {
+            LyricAdapter lyricAdapter = new SimpleLyricAdapter(lrcStream);
+            lrcStream.close();
+            lyricView.setLyricAdapter(lyricAdapter);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         fileUtils = new FileUtils(this);
         modelPath = fileUtils.copyAssets(this, "peiyin_video.mp4");
@@ -68,6 +85,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.role_prepare:
+                lyricView.setVisibility(View.GONE);
                 audioPath = fileUtils.copyAssets(MainActivity.this, "peiyin_audio.mp3");
                 onlyVideoPath = fileUtils.getStorageDirectory() + "/only_video.mp4";
                 rolePath = fileUtils.getStorageDirectory() + "/role_video.mp4";
@@ -133,6 +151,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 tvProcess.setText("");
                 mMediaHelper.startPreView();
                 surfaceView.setVisibility(View.VISIBLE);
+                lyricView.setVisibility(View.VISIBLE);
                 videoView.setVideoPath(modelPath);
 
                 videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -156,6 +175,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                     videoView.start();
                                     videoView.setOnCompletionListener(null);
                                     surfaceView.setVisibility(View.GONE);
+                                    lyricView.setVisibility(View.VISIBLE);
+                                    lyricView.startScroll();
                                 }
 
                                 @Override
@@ -166,6 +187,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 @Override
                                 public void onStart() {
                                     progressBar.setVisibility(View.VISIBLE);
+                                    lyricView.setVisibility(View.GONE);
                                 }
 
                                 @Override
@@ -180,6 +202,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 });
                 videoView.start();
                 mMediaHelper.record();
+                lyricView.startScroll();
                 break;
         }
     }
